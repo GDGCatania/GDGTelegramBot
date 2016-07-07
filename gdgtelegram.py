@@ -4,7 +4,6 @@
 
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import logging
-from utility import *
 from unidecode import unidecode
 import json
 
@@ -54,12 +53,9 @@ def main():
 
 
 	dp.add_handler(CommandHandler("start", start))
-	dp.add_handler(CommandHandler("help", start))
+	dp.add_handler(CommandHandler("help", help))
 	
 
-
-
-	#dp.add_handler(MessageHandler([Filters.text], echo))
 
 
 	dp.add_error_handler(error)
