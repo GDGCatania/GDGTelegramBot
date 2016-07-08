@@ -9,21 +9,17 @@ import json
 import urllib2
 
 
-
-# loading token from config file
-tokenconf = open('token.conf', 'r').read()
-tokenconf = tokenconf.replace("\n", "")
-TOKEN = tokenconf
-
 # Enable logging
 logging.basicConfig(filename='gdgtgbot.log',format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
 	level=logging.INFO)
 
 logger = logging.getLogger(__name__)
 
-
-
-
+# loading token from config file
+logger.info('Loading token from file...')
+tokenconf = open('token.conf', 'r').read()
+tokenconf = tokenconf.replace("\n", "")
+TOKEN = tokenconf
 
 # Define a few command handlers. These usually take the two arguments bot and
 # update. Error handlers also receive the raised TelegramError object in error.
@@ -83,7 +79,7 @@ def ezine_handle(bot,update):
 				bot.sendDocument(chat_id=update.message.chat_id,document=f)
 				logger.info('%s sendend to %s\n' % (temp_file,update.message.from_user.id))
 		else:
-			bot.sendMessage(update.message.chat_id, text='Inserisci il comando corretto!')
+			bot.sendMessage(update.message.chat_id, text=resource_url.split(':')[-1])
 			logger.info('File not found!')	
 		
 	except Exception as e:
@@ -95,26 +91,19 @@ def error(bot, update, error):
 
 
 def main():
-
 	
 
-
-
+	logger.info('Starting Bot!')
 	updater = Updater(TOKEN)
 
 	dp = updater.dispatcher
-
 
 	dp.add_handler(CommandHandler("start", start))
 	dp.add_handler(CommandHandler("help", help))
 
 	dp.add_handler(CommandHandler("gdg-get", ezine_handle))
 	
-
-
-
 	dp.add_error_handler(error)
-
 
 	updater.start_polling()
 
