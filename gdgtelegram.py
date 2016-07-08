@@ -38,38 +38,54 @@ def help(bot, update):
 
 #/gdg-get ezine (last||num)
 def ezine_handle(bot,update):
+
+	logger.info('Serving: %s message: %s\n' % (update.message.from_user.id,update.message.text))
 	
 	try:
 
-		msg=update.message.text
-		msg=msg.split(' ')
-		print msg
+		msg=update.message.text.split(' ')
 
-		#these url are only for testing
-
-		last_url='http://www.unict.it/sites/default/files/guida_1617_small_cert.pdf'
-		one_url='http://www.unict.it/sites/default/files/Guida%20autocertificazione%20reddituale.pdf'
-
-		temp_file='ezine.pdf'
-
-		url=''
+		base_url='http://gdgcatania.org/gdg-get.php?res=ezine-'
+		
+		
 
 		if msg[2]=='last':
-			url=last_url
+			url=base_url+"last"
 		else:
-			url=one_url
+			url=base_url+msg[2]
 	
-		print 'downloading %s\n' % url
+		logger.info('Connecting to %s\n' % url)
+
 		response = urllib2.urlopen(url)
 
-		with open(temp_file,'w') as f:
-			f.write(response.read())
-			f.close()
-			print 'Downloaded'
+		resource_url=response.read()
+
+		logger.info('Response is %s\n' % resource_url)
+
+		if  not 'ERROR:' in resource_url:
+
+		
+			temp_file='/tmp/%s_%s.pdf'% (resource_url.split('/')[-1].split('.')[0],update.message.from_user.id)
+		
+			logger.info('Temp file is %s\n' % temp_file)
+
+			logger.info('Downloading %s\n' % resource_url)			
+
+			response = urllib2.urlopen(resource_url)
+
+			with open(temp_file,'w') as f:
+				f.write(response.read())
+				f.close()
+				logger.info('Downloaded %s\n' % temp_file)
 	
-		with open(temp_file,'r') as f:
-			bot.sendDocument(chat_id=update.message.chat_id,document=f)
-	
+			with open(temp_file,'r') as f:
+				logger.info('Sending to user %s\n' % update.message.from_user.id)
+				bot.sendDocument(chat_id=update.message.chat_id,document=f)
+				logger.info('%s sendend to %s\n' % (temp_file,update.message.from_user.id))
+		else:
+			bot.sendMessage(update.message.chat_id, text='Inserisci il comando corretto!')
+			logger.info('File not found!')	
+		
 	except Exception as e:
 		logger.exception('Update "%s" caused an error "%s"' % (update,e))
 
@@ -103,7 +119,6 @@ def main():
 	updater.start_polling()
 
 	logger.info('Bot started!')
-	print 'Bot Started\n'
 
 	updater.idle()
 
